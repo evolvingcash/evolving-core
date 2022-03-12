@@ -1,0 +1,64 @@
+{
+  "name": "evolving-core",
+  "version": "0.1.0",
+  "description": "evolving protocol core contracts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "contracts",
+    "artifacts",
+    "types"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "size": "npm run compile && npm run hardhat size-contracts",
+    "hardhat": "hardhat",
+    "compile": "hardhat compile",
+    "test": "hardhat test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evolvingcash/evolving-core.git"
+  },
+  "keywords": [
+    "evolving",
+    "lending",
+    "stablecoin",
+    "permissionless"
+  ],
+  "author": "evolving team",
+  "license": "BUSL-1.1",
+  "bugs": {
+    "url": "https://github.com/evolvingcash/evolving-core/issues"
+  },
+  "homepage": "https://github.com/evolvingcash/evolving-core#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@openzeppelin/contracts": "^4.5.0",
+    "@tenderly/hardhat-tenderly": "^1.0.13",
+    "@typechain/ethers-v5": "^9.0.0",
+    "@typechain/hardhat": "^5.0.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^17.0.21",
+    "ethers": "^5.6.0",
+    "hardhat": "^2.9.1",
+    "hardhat-contract-sizer": "^2.5.0",
+    "hardhat-deploy": "^0.10.6",
+    "hardhat-gas-reporter": "^1.0.8",
+    "mocha": "^9.2.2",
+    "prettier": "^2.5.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "solhint": "^3.3.7",
+    "solhint-plugin-prettier": "^0.0.5",
+    "ts-generator": "^0.1.1",
+    "ts-node": "^10.7.0",
+    "tslint": "^6.1.3",
+    "typechain": "^7.0.1",
+    "typescript": "^4.6.2"
+  }
+}
