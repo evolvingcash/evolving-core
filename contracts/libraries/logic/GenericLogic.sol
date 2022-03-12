@@ -184,7 +184,7 @@ library GenericLogic {
       vars.reserveUnitPrice = IPriceOracleGetter(oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && userConfig.isUsingAsCollateral(vars.i)) {
-        vars.compoundedLiquidityBalance = IERC20(currentReserve.aTokenAddress).balanceOf(user);
+        vars.compoundedLiquidityBalance = IERC20(currentReserve.eTokenAddress).balanceOf(user);
 
         uint256 liquidityBalanceETH =
           vars.reserveUnitPrice.mul(vars.compoundedLiquidityBalance).div(vars.tokenUnit);
@@ -198,12 +198,8 @@ library GenericLogic {
       }
 
       if (userConfig.isBorrowing(vars.i)) {
-        vars.compoundedBorrowBalance = IERC20(currentReserve.stableDebtTokenAddress).balanceOf(
-          user
-        );
-        vars.compoundedBorrowBalance = vars.compoundedBorrowBalance.add(
-          IERC20(currentReserve.variableDebtTokenAddress).balanceOf(user)
-        );
+        vars.compoundedBorrowBalance = 
+          IERC20(currentReserve.variableDebtTokenAddress).balanceOf(user);
 
         vars.totalDebtInETH = vars.totalDebtInETH.add(
           vars.reserveUnitPrice.mul(vars.compoundedBorrowBalance).div(vars.tokenUnit)

@@ -17,7 +17,7 @@ library DataTypes {
     //the current stable borrow rate. Expressed in ray
     // uint128 currentStableBorrowRate;
     //tokens addresses
-    address aTokenAddress;
+    address eTokenAddress;
     // address stableDebtTokenAddress;
     address variableDebtTokenAddress;
     //address of the interest rate strategy
