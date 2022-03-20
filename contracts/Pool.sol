@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/interfaces/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
-import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
+
 import './interfaces/IMarket.sol';
 import './interfaces/IEToken.sol';
 import './interfaces/IVariableDebtToken.sol';
@@ -12,11 +14,13 @@ import './interfaces/IFlashLoanReceiver.sol';
 import './interfaces/IPriceOracleGetter.sol';
 import './interfaces/IPool.sol';
 import './libraries/helpers/Errors.sol';
-import  './libraries/math/WadRayMath.sol';
+import './libraries/math/WadRayMath.sol';
 import './libraries/math/PercentageMath.sol';
 import './libraries/logic/ReserveLogic.sol';
 import './libraries/logic/GenericLogic.sol';
 import './libraries/logic/ValidationLogic.sol';
+import './libraries/logic/BorrowLogic.sol';
+import './libraries/logic/LiquidationLogic.sol';
 import './libraries/configuration/ReserveConfiguration.sol';
 import './libraries/configuration/UserConfiguration.sol';
 import './libraries/types/DataTypes.sol';
@@ -37,25 +41,16 @@ import './PoolStorage.sol';
  *   LendingPoolAddressesProvider
  * @author Evolving
  **/
-contract Pool is Initializable, IPool, PoolStorage {
+contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
 
   uint256 public constant _REVISION = 0x2;
 
-  modifier whenNotPaused() {
-    _whenNotPaused();
-    _;
-  }
-
   modifier onlyLendingPoolConfigurator() {
     _onlyLendingPoolConfigurator();
     _;
-  }
-
-  function _whenNotPaused() internal view {
-    require(!_paused, Errors.LP_IS_PAUSED);
   }
 
   function _onlyLendingPoolConfigurator() internal view {
@@ -69,6 +64,8 @@ contract Pool is Initializable, IPool, PoolStorage {
     return _REVISION;
   }
 
+  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
   /**
    * @dev Function is invoked by the proxy contract when the LendingPool contract is added to the
    * LendingPoolAddressesProvider of the market.
@@ -78,7 +75,7 @@ contract Pool is Initializable, IPool, PoolStorage {
    **/
   function initialize(IMarket provider) public initializer {
     _market = provider;
-    _flashLoanPremiumTotal = 9;
+    _flashLoanPremiumTotal = 1;
     _maxNumberOfReserves = 128;
   }
 
@@ -98,7 +95,9 @@ contract Pool is Initializable, IPool, PoolStorage {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) external override whenNotPaused {
+  ) external override {
+    require(!_paused, Errors.LP_IS_PAUSED);
+
     DataTypes.ReserveData storage reserve = _reserves[asset];
 
     ValidationLogic.validateDeposit(reserve, amount);
@@ -135,7 +134,9 @@ contract Pool is Initializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     address to
-  ) external override whenNotPaused returns (uint256) {
+  ) external override returns (uint256) {
+    require(!_paused, Errors.LP_IS_PAUSED);
+
     DataTypes.ReserveData storage reserve = _reserves[asset];
 
     address eToken = reserve.eTokenAddress;
@@ -194,7 +195,9 @@ contract Pool is Initializable, IPool, PoolStorage {
     uint256 amount,
     uint16 referralCode,
     address onBehalfOf
-  ) external override whenNotPaused {
+  ) external override {
+    require(!_paused, Errors.LP_IS_PAUSED);
+
     BorrowLogin.executeBorrow(
       _reserves,
       _reservesList,
@@ -229,7 +232,9 @@ contract Pool is Initializable, IPool, PoolStorage {
     uint256 amount,
     uint256 rateMode,
     address onBehalfOf
-  ) external override whenNotPaused returns (uint256) {
+  ) external override returns (uint256) {
+    require(!_paused, Errors.LP_IS_PAUSED);
+
     DataTypes.ReserveData storage reserve = _reserves[asset];
 
     // (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(onBehalfOf, reserve);
@@ -287,8 +292,9 @@ contract Pool is Initializable, IPool, PoolStorage {
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral)
     external
     override
-    whenNotPaused
   {
+    require(!_paused, Errors.LP_IS_PAUSED);
+
     DataTypes.ReserveData storage reserve = _reserves[asset];
 
     ValidationLogic.validateSetUseReserveAsCollateral(
@@ -328,7 +334,9 @@ contract Pool is Initializable, IPool, PoolStorage {
     address user,
     uint256 debtToCover,
     bool receiveEToken
-  ) external override whenNotPaused {
+  ) external override {
+    require(!_paused, Errors.LP_IS_PAUSED);
+
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[user];
     LiquidationLogic.liquidationCall(
         _reserves,
@@ -383,7 +391,9 @@ contract Pool is Initializable, IPool, PoolStorage {
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode
-  ) external override whenNotPaused {
+  ) external override {
+    require(!_paused, Errors.LP_IS_PAUSED);
+
     FlashLoanLocalVars memory vars;
 
     ValidationLogic.validateFlashloan(assets, amounts);
@@ -461,6 +471,57 @@ contract Pool is Initializable, IPool, PoolStorage {
       );
     }
   }
+
+  /**
+   * @dev Validates and finalizes an eToken transfer
+   * - Only callable by the overlying eToken of the `asset`
+   * @param asset The address of the underlying asset of the eToken
+   * @param from The user from which the eTokens are transferred
+   * @param to The user receiving the eTokens
+   * @param amount The amount being transferred/withdrawn
+   * @param balanceFromBefore The eToken balance of the `from` user before the transfer
+   * @param balanceToBefore The eToken balance of the `to` user before the transfer
+   */
+  function finalizeTransfer(
+    address asset,
+    address from,
+    address to,
+    uint256 amount,
+    uint256 balanceFromBefore,
+    uint256 balanceToBefore
+  ) external override {
+    require(!_paused, Errors.LP_IS_PAUSED);
+    require(msg.sender == _reserves[asset].eTokenAddress, Errors.LP_CALLER_MUST_BE_AN_ATOKEN);
+
+    ValidationLogic.validateTransfer(
+      from,
+      _reserves,
+      _usersConfig[from],
+      _reservesList,
+      _reservesCount,
+      _market.getPriceOracle()
+    );
+
+    uint256 reserveId = _reserves[asset].id;
+
+    if (from != to) {
+      if (balanceFromBefore.sub(amount) == 0) {
+        DataTypes.UserConfigurationMap storage fromConfig = _usersConfig[from];
+        fromConfig.setUsingAsCollateral(reserveId, false);
+        emit ReserveUsedAsCollateralDisabled(asset, from);
+      }
+
+      if (balanceToBefore == 0 && amount != 0) {
+        DataTypes.UserConfigurationMap storage toConfig = _usersConfig[to];
+        toConfig.setUsingAsCollateral(reserveId, true);
+        emit ReserveUsedAsCollateralEnabled(asset, to);
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  // VIEW FUNCTIONS
+  //----------------------------------------------------------------------------
 
   /**
    * @dev Returns the state and configuration of the reserve
@@ -618,51 +679,9 @@ contract Pool is Initializable, IPool, PoolStorage {
     return _maxNumberOfReserves;
   }
 
-  /**
-   * @dev Validates and finalizes an eToken transfer
-   * - Only callable by the overlying eToken of the `asset`
-   * @param asset The address of the underlying asset of the eToken
-   * @param from The user from which the eTokens are transferred
-   * @param to The user receiving the eTokens
-   * @param amount The amount being transferred/withdrawn
-   * @param balanceFromBefore The eToken balance of the `from` user before the transfer
-   * @param balanceToBefore The eToken balance of the `to` user before the transfer
-   */
-  function finalizeTransfer(
-    address asset,
-    address from,
-    address to,
-    uint256 amount,
-    uint256 balanceFromBefore,
-    uint256 balanceToBefore
-  ) external override whenNotPaused {
-    require(msg.sender == _reserves[asset].eTokenAddress, Errors.LP_CALLER_MUST_BE_AN_ATOKEN);
-
-    ValidationLogic.validateTransfer(
-      from,
-      _reserves,
-      _usersConfig[from],
-      _reservesList,
-      _reservesCount,
-      _market.getPriceOracle()
-    );
-
-    uint256 reserveId = _reserves[asset].id;
-
-    if (from != to) {
-      if (balanceFromBefore.sub(amount) == 0) {
-        DataTypes.UserConfigurationMap storage fromConfig = _usersConfig[from];
-        fromConfig.setUsingAsCollateral(reserveId, false);
-        emit ReserveUsedAsCollateralDisabled(asset, from);
-      }
-
-      if (balanceToBefore == 0 && amount != 0) {
-        DataTypes.UserConfigurationMap storage toConfig = _usersConfig[to];
-        toConfig.setUsingAsCollateral(reserveId, true);
-        emit ReserveUsedAsCollateralEnabled(asset, to);
-      }
-    }
-  }
+  //----------------------------------------------------------------------------
+  // ADMIN FUNCTIONS
+  //----------------------------------------------------------------------------
 
   /**
    * @dev Initializes a reserve, activating it, assigning an eToken and debt tokens and an
