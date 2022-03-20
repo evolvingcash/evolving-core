@@ -50,7 +50,7 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
   using ReserveLogic for DataTypes.ReserveData;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  uint256 public constant _REVISION = 0x2;
+  uint256 public constant REVISION = 0x2;
 
 //   modifier onlyLendingPoolConfigurator() {
 //     _onlyLendingPoolConfigurator();
@@ -63,10 +63,6 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
 //       Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
 //     );
 //   }
-
-  function getRevision() internal pure returns (uint256) {
-    return _REVISION;
-  }
 
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
