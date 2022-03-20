@@ -12,7 +12,7 @@ import '../types/DataTypes.sol';
 
 /**
  * @title GenericLogic library
- * @author Aave
+ * @author Evolving
  * @title Implements protocol-level logic to calculate and validate the state of a user
  */
 library GenericLogic {

@@ -15,7 +15,7 @@ import '../types/DataTypes.sol';
 
 /**
  * @title ReserveLogic library
- * @author Aave
+ * @author Evolving
  * @notice Implements the logic to update the reserves state
  */
 library ReserveLogic {

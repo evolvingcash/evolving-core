@@ -46,4 +46,26 @@ library DataTypes {
   }
 
   enum InterestRateMode {NONE, VARIABLE}
+
+  struct ExecuteBorrowParams {
+    address asset;
+    address user;
+    address onBehalfOf;
+    uint256 amount;
+    // uint256 interestRateMode;
+    uint16 referralCode;
+    bool releaseUnderlying;
+    address oracle;
+    uint256 reservesCount;
+  }
+
+  struct LiquidationCallParams {
+    uint256 reservesCount;
+    address collateralAsset;
+    address debtAsset;
+    address user;
+    uint256 debtToCover;
+    bool receiveEToken;
+    address priceOracle;
+  }
 }

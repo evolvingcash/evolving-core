@@ -7,7 +7,7 @@ import './IAaveIncentivesController.sol';
 /**
  * @title IInitializableEToken
  * @notice Interface for the initialize function on EToken
- * @author Aave
+ * @author Evolving
  **/
 interface IInitializableEToken {
   /**

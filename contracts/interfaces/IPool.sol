@@ -36,7 +36,6 @@ interface IPool {
    * initiator of the transaction on flashLoan()
    * @param onBehalfOf The address that will be getting the debt
    * @param amount The amount borrowed out
-   * @param borrowRateMode The rate mode: 1 for Stable, 2 for Variable
    * @param borrowRate The numeric rate at which the user has borrowed
    * @param referral The referral code used
    **/
@@ -45,7 +44,7 @@ interface IPool {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint256 borrowRateMode,
+    // uint256 borrowRateMode,
     uint256 borrowRate,
     uint16 indexed referral
   );

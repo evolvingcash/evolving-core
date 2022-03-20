@@ -7,7 +7,7 @@ import './IPool.sol';
 /**
  * @title IFlashLoanReceiver interface
  * @notice Interface for the Aave fee IFlashLoanReceiver.
- * @author Aave
+ * @author Evolving
  * @dev implement this interface to develop a flashloan-compatible flashLoanReceiver contract
  **/
 interface IFlashLoanReceiver {

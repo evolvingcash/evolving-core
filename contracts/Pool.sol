@@ -30,8 +30,6 @@ import './PoolStorage.sol';
  *   # Withdraw
  *   # Borrow
  *   # Repay
- *   # Swap their loans between variable and stable rate
- *   # Enable/disable their deposits as collateral rebalance stable rate borrow positions
  *   # Liquidate positions
  *   # Execute Flash Loans
  * - To be covered by a proxy contract, owned by the LendingPoolAddressesProvider of the specific market
@@ -44,7 +42,7 @@ contract Pool is Initializable, IPool, PoolStorage {
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
 
-  uint256 public constant LENDINGPOOL_REVISION = 0x2;
+  uint256 public constant _REVISION = 0x2;
 
   modifier whenNotPaused() {
     _whenNotPaused();
@@ -68,7 +66,7 @@ contract Pool is Initializable, IPool, PoolStorage {
   }
 
   function getRevision() internal pure override returns (uint256) {
-    return LENDINGPOOL_REVISION;
+    return _REVISION;
   }
 
   /**
@@ -80,7 +78,6 @@ contract Pool is Initializable, IPool, PoolStorage {
    **/
   function initialize(IMarket provider) public initializer {
     _market = provider;
-    _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
     _maxNumberOfReserves = 128;
   }
@@ -186,7 +183,6 @@ contract Pool is Initializable, IPool, PoolStorage {
    *   and 100 stable/variable debt tokens, depending on the `interestRateMode`
    * @param asset The address of the underlying asset to borrow
    * @param amount The amount to be borrowed
-   * @param interestRateMode The interest rate mode at which the user wants to borrow: 1 for Stable, 2 for Variable
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    * @param onBehalfOf Address of the user who will receive the debt. Should be the address of the borrower itself
@@ -196,22 +192,22 @@ contract Pool is Initializable, IPool, PoolStorage {
   function borrow(
     address asset,
     uint256 amount,
-    uint256 interestRateMode,
     uint16 referralCode,
     address onBehalfOf
   ) external override whenNotPaused {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-
-    _executeBorrow(
-      ExecuteBorrowParams(
+    BorrowLogin.executeBorrow(
+      _reserves,
+      _reservesList,
+      _usersConfig[onBehalfOf],
+      DataTypes.ExecuteBorrowParams(
         asset,
         msg.sender,
         onBehalfOf,
         amount,
-        interestRateMode,
-        reserve.eTokenAddress,
         referralCode,
-        true
+        true,
+        _market.getPriceOracle(),
+        _maxNumberOfReserves
       )
     );
   }
@@ -314,22 +310,6 @@ contract Pool is Initializable, IPool, PoolStorage {
       emit ReserveUsedAsCollateralDisabled(asset, msg.sender);
     }
   }
-  struct LiquidationCallLocalVars {
-    uint256 userCollateralBalance;
-    uint256 userVariableDebt;
-    uint256 maxLiquidatableDebt;
-    uint256 actualDebtToLiquidate;
-    uint256 liquidationRatio;
-    uint256 maxAmountCollateralToLiquidate;
-    uint256 maxCollateralToLiquidate;
-    uint256 debtAmountNeeded;
-    uint256 healthFactor;
-    uint256 liquidatorPreviousETokenBalance;
-    IEToken collateralEtoken;
-    bool isCollateralEnabled;
-    uint256 errorCode;
-    string errorMsg;
-  }
 
   /**
    * @dev Function to liquidate a non-healthy position collateral-wise, with Health Factor below 1
@@ -349,163 +329,21 @@ contract Pool is Initializable, IPool, PoolStorage {
     uint256 debtToCover,
     bool receiveEToken
   ) external override whenNotPaused {
-    DataTypes.ReserveData storage collateralReserve = _reserves[collateralAsset];
-    DataTypes.ReserveData storage debtReserve = _reserves[debtAsset];
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[user];
-
-    LiquidationCallLocalVars memory vars;
-
-    (, , , , vars.healthFactor) = GenericLogic.calculateUserAccountData(
-      user,
-      _reserves,
-      userConfig,
-      _reservesList,
-      _reservesCount,
-      _market.getPriceOracle()
+    LiquidationLogic.liquidationCall(
+        _reserves,
+        _reservesList,
+        userConfig,
+        DataTypes.LiquidationCallParams(
+            _reservesCount,
+            collateralAsset,
+            debtAsset,
+            user,
+            debtToCover,
+            receiveEToken,
+            _market.getPriceOracle()
+        )
     );
-
-    // (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(user, debtReserve);
-    vars.userVariableDebt = IERC20(debtReserve.variableDebtTokenAddress).balanceOf(user)
-    (vars.errorCode, vars.errorMsg) = ValidationLogic.validateLiquidationCall(
-      collateralReserve,
-      debtReserve,
-      userConfig,
-      vars.healthFactor,
-    //   vars.userStableDebt,
-      vars.userVariableDebt
-    );
-
-    if (Errors.CollateralManagerErrors(vars.errorCode) != Errors.CollateralManagerErrors.NO_ERROR) {
-      return (vars.errorCode, vars.errorMsg);
-    }
-
-    vars.collateralEtoken = IEToken(collateralReserve.aTokenAddress);
-
-    vars.userCollateralBalance = vars.collateralEtoken.balanceOf(user);
-
-    vars.maxLiquidatableDebt = vars.userVariableDebt.percentMul(
-      LIQUIDATION_CLOSE_FACTOR_PERCENT
-    );
-
-    vars.actualDebtToLiquidate = debtToCover > vars.maxLiquidatableDebt
-      ? vars.maxLiquidatableDebt
-      : debtToCover;
-
-    (
-      vars.maxCollateralToLiquidate,
-      vars.debtAmountNeeded
-    ) = _calculateAvailableCollateralToLiquidate(
-      collateralReserve,
-      debtReserve,
-      collateralAsset,
-      debtAsset,
-      vars.actualDebtToLiquidate,
-      vars.userCollateralBalance
-    );
-
-    // If debtAmountNeeded < actualDebtToLiquidate, there isn't enough
-    // collateral to cover the actual amount that is being liquidated, hence we liquidate
-    // a smaller amount
-
-    if (vars.debtAmountNeeded < vars.actualDebtToLiquidate) {
-      vars.actualDebtToLiquidate = vars.debtAmountNeeded;
-    }
-
-    // If the liquidator reclaims the underlying asset, we make sure there is enough available liquidity in the
-    // collateral reserve
-    if (!receiveEToken) {
-      uint256 currentAvailableCollateral =
-        IERC20(collateralAsset).balanceOf(address(vars.collateralEtoken));
-      if (currentAvailableCollateral < vars.maxCollateralToLiquidate) {
-        return (
-          uint256(Errors.CollateralManagerErrors.NOT_ENOUGH_LIQUIDITY),
-          Errors.LPCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE
-        );
-      }
-    }
-
-    debtReserve.updateState();
-
-    if (vars.userVariableDebt >= vars.actualDebtToLiquidate) {
-      IVariableDebtToken(debtReserve.variableDebtTokenAddress).burn(
-        user,
-        vars.actualDebtToLiquidate,
-        debtReserve.variableBorrowIndex
-      );
-    } else {
-      // If the user doesn't have variable debt, no need to try to burn variable debt tokens
-      if (vars.userVariableDebt > 0) {
-        IVariableDebtToken(debtReserve.variableDebtTokenAddress).burn(
-          user,
-          vars.userVariableDebt,
-          debtReserve.variableBorrowIndex
-        );
-      }
-    //   IStableDebtToken(debtReserve.stableDebtTokenAddress).burn(
-    //     user,
-    //     vars.actualDebtToLiquidate.sub(vars.userVariableDebt)
-    //   );
-    }
-
-    debtReserve.updateInterestRates(
-      debtAsset,
-      debtReserve.aTokenAddress,
-      vars.actualDebtToLiquidate,
-      0
-    );
-
-    if (receiveEToken) {
-      vars.liquidatorPreviousETokenBalance = IERC20(vars.collateralEtoken).balanceOf(msg.sender);
-      vars.collateralEtoken.transferOnLiquidation(user, msg.sender, vars.maxCollateralToLiquidate);
-
-      if (vars.liquidatorPreviousETokenBalance == 0) {
-        DataTypes.UserConfigurationMap storage liquidatorConfig = _usersConfig[msg.sender];
-        liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
-        emit ReserveUsedAsCollateralEnabled(collateralAsset, msg.sender);
-      }
-    } else {
-      collateralReserve.updateState();
-      collateralReserve.updateInterestRates(
-        collateralAsset,
-        address(vars.collateralEtoken),
-        0,
-        vars.maxCollateralToLiquidate
-      );
-
-      // Burn the equivalent amount of aToken, sending the underlying to the liquidator
-      vars.collateralEtoken.burn(
-        user,
-        msg.sender,
-        vars.maxCollateralToLiquidate,
-        collateralReserve.liquidityIndex
-      );
-    }
-
-    // If the collateral being liquidated is equal to the user balance,
-    // we set the currency as not being used as collateral anymore
-    if (vars.maxCollateralToLiquidate == vars.userCollateralBalance) {
-      userConfig.setUsingAsCollateral(collateralReserve.id, false);
-      emit ReserveUsedAsCollateralDisabled(collateralAsset, user);
-    }
-
-    // Transfers the debt asset being repaid to the aToken, where the liquidity is kept
-    IERC20(debtAsset).safeTransferFrom(
-      msg.sender,
-      debtReserve.aTokenAddress,
-      vars.actualDebtToLiquidate
-    );
-
-    emit LiquidationCall(
-      collateralAsset,
-      debtAsset,
-      user,
-      vars.actualDebtToLiquidate,
-      vars.maxCollateralToLiquidate,
-      msg.sender,
-      receiveEToken
-    );
-
-    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.LPCM_NO_ERRORS);
   }
 
   struct FlashLoanLocalVars {
@@ -596,16 +434,20 @@ contract Pool is Initializable, IPool, PoolStorage {
       } else {
         // If the user chose to not return the funds, the system checks if there is enough collateral and
         // eventually opens a debt position
-        _executeBorrow(
-          ExecuteBorrowParams(
+        BorrowLogic.executeBorrow(
+          _reserves,
+          _reservesList,
+          _usersConfig[onBehalfOf],
+          DataTypes.ExecuteBorrowParams(
             vars.currentAsset,
             msg.sender,
             onBehalfOf,
             vars.currentAmount,
-            modes[vars.i],
-            vars.currentETokenAddress,
+            // modes[vars.i],
             referralCode,
-            false
+            false,
+            _market.getPriceOracle(),
+            _maxNumberOfReserves
           )
         );
       }
@@ -763,13 +605,6 @@ contract Pool is Initializable, IPool, PoolStorage {
   }
 
   /**
-   * @dev Returns the percentage of available liquidity that can be borrowed at once at stable rate
-   */
-  function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() public view returns (uint256) {
-    return _maxStableRateBorrowSizePercent;
-  }
-
-  /**
    * @dev Returns the fee on flash loans 
    */
   function FLASHLOAN_PREMIUM_TOTAL() public view returns (uint256) {
@@ -835,21 +670,18 @@ contract Pool is Initializable, IPool, PoolStorage {
    * - Only callable by the LendingPoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param eTokenAddress The address of the eToken that will be assigned to the reserve
-   * @param stableDebtAddress The address of the StableDebtToken that will be assigned to the reserve
    * @param eTokenAddress The address of the VariableDebtToken that will be assigned to the reserve
    * @param interestRateStrategyAddress The address of the interest rate strategy contract
    **/
   function initReserve(
     address asset,
     address eTokenAddress,
-    address stableDebtAddress,
     address variableDebtAddress,
     address interestRateStrategyAddress
   ) external override onlyLendingPoolConfigurator {
     require(Address.isContract(asset), Errors.LP_NOT_CONTRACT);
     _reserves[asset].init(
       eTokenAddress,
-      stableDebtAddress,
       variableDebtAddress,
       interestRateStrategyAddress
     );
@@ -896,94 +728,6 @@ contract Pool is Initializable, IPool, PoolStorage {
     } else {
       emit Unpaused();
     }
-  }
-
-  struct ExecuteBorrowParams {
-    address asset;
-    address user;
-    address onBehalfOf;
-    uint256 amount;
-    uint256 interestRateMode;
-    address eTokenAddress;
-    uint16 referralCode;
-    bool releaseUnderlying;
-  }
-
-  function _executeBorrow(ExecuteBorrowParams memory vars) internal {
-    DataTypes.ReserveData storage reserve = _reserves[vars.asset];
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[vars.onBehalfOf];
-
-    address oracle = _market.getPriceOracle();
-
-    uint256 amountInETH =
-      IPriceOracleGetter(oracle).getAssetPrice(vars.asset).mul(vars.amount).div(
-        10**reserve.configuration.getDecimals()
-      );
-
-    ValidationLogic.validateBorrow(
-      vars.asset,
-      reserve,
-      vars.onBehalfOf,
-      vars.amount,
-      amountInETH,
-      vars.interestRateMode,
-      _maxStableRateBorrowSizePercent,
-      _reserves,
-      userConfig,
-      _reservesList,
-      _reservesCount,
-      oracle
-    );
-
-    reserve.updateState();
-
-    uint256 currentStableRate = 0;
-
-    bool isFirstBorrowing = false;
-    if (DataTypes.InterestRateMode(vars.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
-      currentStableRate = reserve.currentStableBorrowRate;
-
-      isFirstBorrowing = IStableDebtToken(reserve.stableDebtTokenAddress).mint(
-        vars.user,
-        vars.onBehalfOf,
-        vars.amount,
-        currentStableRate
-      );
-    } else {
-      isFirstBorrowing = IVariableDebtToken(reserve.variableDebtTokenAddress).mint(
-        vars.user,
-        vars.onBehalfOf,
-        vars.amount,
-        reserve.variableBorrowIndex
-      );
-    }
-
-    if (isFirstBorrowing) {
-      userConfig.setBorrowing(reserve.id, true);
-    }
-
-    reserve.updateInterestRates(
-      vars.asset,
-      vars.eTokenAddress,
-      0,
-      vars.releaseUnderlying ? vars.amount : 0
-    );
-
-    if (vars.releaseUnderlying) {
-      IEToken(vars.eTokenAddress).transferUnderlyingTo(vars.user, vars.amount);
-    }
-
-    emit Borrow(
-      vars.asset,
-      vars.user,
-      vars.onBehalfOf,
-      vars.amount,
-      vars.interestRateMode,
-      DataTypes.InterestRateMode(vars.interestRateMode) == DataTypes.InterestRateMode.STABLE
-        ? currentStableRate
-        : reserve.currentVariableBorrowRate,
-      vars.referralCode
-    );
   }
 
   function _addReserveToList(address asset) internal {

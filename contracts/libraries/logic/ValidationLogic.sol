@@ -118,7 +118,7 @@ library ValidationLogic {
     address userAddress,
     uint256 amount,
     uint256 amountInETH,
-    uint256 interestRateMode,
+    // uint256 interestRateMode,
     mapping(address => DataTypes.ReserveData) storage reservesData,
     DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reserves,
@@ -138,10 +138,10 @@ library ValidationLogic {
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
     //validate interest rate mode
-    require(
-      uint256(DataTypes.InterestRateMode.VARIABLE) == interestRateMode,
-      Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
-    );
+    // require(
+    //   uint256(DataTypes.InterestRateMode.VARIABLE) == interestRateMode,
+    //   Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
+    // );
 
     (
       vars.userCollateralBalanceETH,

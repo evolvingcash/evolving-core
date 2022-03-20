@@ -13,8 +13,8 @@ interface IMarket {
   event PoolUpdated(address indexed newAddress);
   event ConfigurationAdminUpdated(address indexed newAddress);
   event EmergencyAdminUpdated(address indexed newAddress);
-  event PoolConfiguratorUpdated(address indexed newAddress);
-  event PoolCollateralManagerUpdated(address indexed newAddress);
+  // event PoolConfiguratorUpdated(address indexed newAddress);
+  // event PoolCollateralManagerUpdated(address indexed newAddress);
   event PriceOracleUpdated(address indexed newAddress);
   event LendingRateOracleUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
@@ -30,13 +30,13 @@ interface IMarket {
 
   function setPoolImpl(address pool) external;
 
-  function getPoolConfigurator() external view returns (address);
+  // function getPoolConfigurator() external view returns (address);
 
-  function setPoolConfiguratorImpl(address configurator) external;
+  // function setPoolConfiguratorImpl(address configurator) external;
 
-  function getPoolCollateralManager() external view returns (address);
+  // function getPoolCollateralManager() external view returns (address);
 
-  function setPoolCollateralManager(address manager) external;
+  // function setPoolCollateralManager(address manager) external;
 
   function getPoolAdmin() external view returns (address);
 
