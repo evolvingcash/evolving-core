@@ -1,19 +1,38 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import '@openzeppelin/contracts/utils/math/SafeCast.sol';
+import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './ValidationLogic.sol';
 import '../types/DataTypes.sol';
+import '../configuration/ReserveConfiguration.sol';
 import '../../interfaces/IPriceOracleGetter.sol';
 import '../../interfaces/IEToken.sol';
 import '../../interfaces/IPool.sol';
 import '../../interfaces/IVariableDebtToken.sol';
 
 /**
- * @title BorrwoLogic library
+ * @title BorrowLogic library
  * @author Evolving
  * @title Implements protocol-level borrow logic
  */
-library BorrwoLogic {
+library BorrowLogic {
+  using SafeCast for uint256;
+  using SafeMath for uint256;
+  using ReserveLogic for DataTypes.ReserveData;
+  using UserConfiguration for DataTypes.UserConfigurationMap;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+
+  event Borrow(
+    address indexed reserve,
+    address user,
+    address indexed onBehalfOf,
+    uint256 amount,
+    // uint256 borrowRateMode,
+    uint256 borrowRate,
+    uint16 indexed referral
+  );
+
   /**
    * @dev excute borrow
    */
@@ -33,13 +52,12 @@ library BorrwoLogic {
       );
 
     ValidationLogic.validateBorrow(
-      vars.asset,
       reserve,
       vars.onBehalfOf,
       vars.amount,
       amountInETH,
       // vars.interestRateMode,
-      vars.maxStableRateBorrowSizePercent,
+      // vars.maxStableRateBorrowSizePercent,
       _reserves,
       userConfig,
       _reservesList,
@@ -49,7 +67,7 @@ library BorrwoLogic {
 
     reserve.updateState();
 
-    uint256 currentStableRate = 0;
+    // uint256 currentStableRate = 0;
 
     bool isFirstBorrowing = false;
     // if (DataTypes.InterestRateMode(vars.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
@@ -76,13 +94,13 @@ library BorrwoLogic {
 
     reserve.updateInterestRates(
       vars.asset,
-      vars.eTokenAddress,
+      reserve.eTokenAddress,
       0,
       vars.releaseUnderlying ? vars.amount : 0
     );
 
     if (vars.releaseUnderlying) {
-      IEToken(vars.eTokenAddress).transferUnderlyingTo(vars.user, vars.amount);
+      IEToken(reserve.eTokenAddress).transferUnderlyingTo(vars.user, vars.amount);
     }
 
     emit Borrow(

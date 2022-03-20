@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity ^0.8.0;
 
-import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
-import {WadRayMath} from './WadRayMath.sol';
+import {SafeMath} from '@openzeppelin/contracts/utils/math/SafeMath.sol';
+import './WadRayMath.sol';
 
 library MathUtils {
   using SafeMath for uint256;
@@ -26,7 +26,7 @@ library MathUtils {
     //solium-disable-next-line
     uint256 timeDifference = block.timestamp.sub(uint256(lastUpdateTimestamp));
 
-    return (rate.mul(timeDifference) / SECONDS_PER_YEAR).add(WadRayMath.ray());
+    return (rate.mul(timeDifference) / SECONDS_PER_YEAR).add(WadRayMath.RAY);
   }
 
   /**
@@ -51,7 +51,7 @@ library MathUtils {
     uint256 exp = currentTimestamp.sub(uint256(lastUpdateTimestamp));
 
     if (exp == 0) {
-      return WadRayMath.ray();
+      return WadRayMath.RAY;
     }
 
     uint256 expMinusOne = exp - 1;
@@ -66,7 +66,7 @@ library MathUtils {
     uint256 secondTerm = exp.mul(expMinusOne).mul(basePowerTwo) / 2;
     uint256 thirdTerm = exp.mul(expMinusOne).mul(expMinusTwo).mul(basePowerThree) / 6;
 
-    return WadRayMath.ray().add(ratePerSecond.mul(exp)).add(secondTerm).add(thirdTerm);
+    return WadRayMath.RAY.add(ratePerSecond.mul(exp)).add(secondTerm).add(thirdTerm);
   }
 
   /**

@@ -28,7 +28,7 @@ contract Market is Ownable, IMarket {
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant LENDING_RATE_ORACLE = 'LENDING_RATE_ORACLE';
 
-  constructor() public {
+  constructor() {
   }
 
   /**

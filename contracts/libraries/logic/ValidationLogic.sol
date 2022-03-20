@@ -100,12 +100,10 @@ library ValidationLogic {
 
   /**
    * @dev Validates a borrow action
-   * @param asset The address of the asset to borrow
    * @param reserve The reserve state from which the user is borrowing
    * @param userAddress The address of the user
    * @param amount The amount to be borrowed
    * @param amountInETH The amount to be borrowed, in ETH
-   * @param interestRateMode The interest rate mode at which the user is borrowing
    * @param reservesData The state of all the reserves
    * @param userConfig The state of the user for the specific reserve
    * @param reserves The addresses of all the active reserves
@@ -113,7 +111,6 @@ library ValidationLogic {
    */
 
   function validateBorrow(
-    address asset,
     DataTypes.ReserveData storage reserve,
     address userAddress,
     uint256 amount,
@@ -186,7 +183,7 @@ library ValidationLogic {
   function validateRepay(
     DataTypes.ReserveData storage reserve,
     uint256 amountSent,
-    DataTypes.InterestRateMode rateMode,
+    // DataTypes.InterestRateMode rateMode,
     address onBehalfOf,
     uint256 variableDebt
   ) external view {
@@ -196,14 +193,10 @@ library ValidationLogic {
 
     require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
 
-    require(
-        (variableDebt > 0 &&
-          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
-      Errors.VL_NO_DEBT_OF_SELECTED_TYPE
-    );
+    require(variableDebt > 0, Errors.VL_NO_DEBT_OF_SELECTED_TYPE);
 
     require(
-      amountSent != uint256(-1) || msg.sender == onBehalfOf,
+      amountSent != type(uint256).max || msg.sender == onBehalfOf,
       Errors.VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
     );
   }
@@ -270,43 +263,49 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     uint256 userHealthFactor,
     uint256 userVariableDebt
-  ) internal view returns (uint256, string memory) {
-    if (
-      !collateralReserve.configuration.getActive() || !principalReserve.configuration.getActive()
-    ) {
-      return (
-        uint256(Errors.CollateralManagerErrors.NO_ACTIVE_RESERVE),
-        Errors.VL_NO_ACTIVE_RESERVE
-      );
-    }
+  ) internal view {
+    require(collateralReserve.configuration.getActive() && principalReserve.configuration.getActive(),
+      Errors.VL_NO_ACTIVE_RESERVE);
+    // if (
+    //   !collateralReserve.configuration.getActive() || !principalReserve.configuration.getActive()
+    // ) {
+    //   return (
+    //     uint256(Errors.CollateralManagerErrors.NO_ACTIVE_RESERVE),
+    //     Errors.VL_NO_ACTIVE_RESERVE
+    //   );
+    // }
 
-    if (userHealthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD) {
-      return (
-        uint256(Errors.CollateralManagerErrors.HEALTH_FACTOR_ABOVE_THRESHOLD),
-        Errors.LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
-      );
-    }
+    require(userHealthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD, 
+      Errors.LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD);
+    // if (userHealthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD) {
+    //   return (
+    //     uint256(Errors.CollateralManagerErrors.HEALTH_FACTOR_ABOVE_THRESHOLD),
+    //     Errors.LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
+    //   );
+    // }
 
     bool isCollateralEnabled =
       collateralReserve.configuration.getLiquidationThreshold() > 0 &&
         userConfig.isUsingAsCollateral(collateralReserve.id);
 
     //if collateral isn't enabled as collateral by user, it cannot be liquidated
-    if (!isCollateralEnabled) {
-      return (
-        uint256(Errors.CollateralManagerErrors.COLLATERAL_CANNOT_BE_LIQUIDATED),
-        Errors.LPCM_COLLATERAL_CANNOT_BE_LIQUIDATED
-      );
-    }
+    require(isCollateralEnabled, Errors.LPCM_COLLATERAL_CANNOT_BE_LIQUIDATED);
+    // if (!isCollateralEnabled) {
+    //   return (
+    //     uint256(Errors.CollateralManagerErrors.COLLATERAL_CANNOT_BE_LIQUIDATED),
+    //     Errors.LPCM_COLLATERAL_CANNOT_BE_LIQUIDATED
+    //   );
+    // }
 
-    if (userVariableDebt == 0) {
-      return (
-        uint256(Errors.CollateralManagerErrors.CURRRENCY_NOT_BORROWED),
-        Errors.LPCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER
-      );
-    }
+    require(userVariableDebt > 0, Errors.LPCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+    // if (userVariableDebt == 0) {
+    //   return (
+    //     uint256(Errors.CollateralManagerErrors.CURRRENCY_NOT_BORROWED),
+    //     Errors.LPCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER
+    //   );
+    // }
 
-    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.LPCM_NO_ERRORS);
+    // return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.LPCM_NO_ERRORS);
   }
 
   /**

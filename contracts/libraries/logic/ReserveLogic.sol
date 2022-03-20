@@ -124,8 +124,7 @@ library ReserveLogic {
       scaledVariableDebt,
       previousVariableBorrowIndex,
       newLiquidityIndex,
-      newVariableBorrowIndex,
-      lastUpdatedTimestamp
+      newVariableBorrowIndex
     );
   }
 
@@ -143,7 +142,7 @@ library ReserveLogic {
   ) internal {
     uint256 amountToLiquidityRatio = amount.wadToRay().rayDiv(totalLiquidity.wadToRay());
 
-    uint256 result = amountToLiquidityRatio.add(WadRayMath.ray());
+    uint256 result = amountToLiquidityRatio.add(WadRayMath.RAY);
 
     result = result.rayMul(reserve.liquidityIndex);
     require(result <= type(uint128).max, Errors.RL_LIQUIDITY_INDEX_OVERFLOW);
@@ -165,8 +164,8 @@ library ReserveLogic {
   ) external {
     require(reserve.eTokenAddress == address(0), Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
-    reserve.liquidityIndex = uint128(WadRayMath.ray());
-    reserve.variableBorrowIndex = uint128(WadRayMath.ray());
+    reserve.liquidityIndex = uint128(WadRayMath.RAY);
+    reserve.variableBorrowIndex = uint128(WadRayMath.RAY);
     reserve.eTokenAddress = eTokenAddress;
     reserve.variableDebtTokenAddress = variableDebtTokenAddress;
     reserve.interestRateStrategyAddress = interestRateStrategyAddress;
@@ -249,8 +248,7 @@ library ReserveLogic {
     uint256 scaledVariableDebt,
     uint256 previousVariableBorrowIndex,
     uint256 newLiquidityIndex,
-    uint256 newVariableBorrowIndex,
-    uint40 timestamp
+    uint256 newVariableBorrowIndex
   ) internal {
     MintToTreasuryLocalVars memory vars;
 

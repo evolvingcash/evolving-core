@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import './ILendingPool.sol';
+import './IPool.sol';
 import './IAaveIncentivesController.sol';
 
 /**
@@ -43,7 +43,7 @@ interface IInitializableEToken {
    * @param eTokenSymbol The symbol of the eToken
    */
   function initialize(
-    ILendingPool pool,
+    IPool pool,
     address treasury,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,

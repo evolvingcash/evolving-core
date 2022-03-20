@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
+import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/interfaces/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
@@ -42,25 +43,28 @@ import './PoolStorage.sol';
  * @author Evolving
  **/
 contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
+  using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
+  using ReserveLogic for DataTypes.ReserveData;
+  using UserConfiguration for DataTypes.UserConfigurationMap;
 
   uint256 public constant _REVISION = 0x2;
 
-  modifier onlyLendingPoolConfigurator() {
-    _onlyLendingPoolConfigurator();
-    _;
-  }
+//   modifier onlyLendingPoolConfigurator() {
+//     _onlyLendingPoolConfigurator();
+//     _;
+//   }
 
-  function _onlyLendingPoolConfigurator() internal view {
-    require(
-      _market.getLendingPoolConfigurator() == msg.sender,
-      Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
-    );
-  }
+//   function _onlyLendingPoolConfigurator() internal view {
+//     require(
+//       _market.getLendingPoolConfigurator() == msg.sender,
+//       Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
+//     );
+//   }
 
-  function getRevision() internal pure override returns (uint256) {
+  function getRevision() internal pure returns (uint256) {
     return _REVISION;
   }
 
@@ -198,7 +202,7 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
   ) external override {
     require(!_paused, Errors.LP_IS_PAUSED);
 
-    BorrowLogin.executeBorrow(
+    BorrowLogic.executeBorrow(
       _reserves,
       _reservesList,
       _usersConfig[onBehalfOf],
@@ -221,7 +225,6 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
-   * @param rateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
    * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
@@ -230,7 +233,6 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
   function repay(
     address asset,
     uint256 amount,
-    uint256 rateMode,
     address onBehalfOf
   ) external override returns (uint256) {
     require(!_paused, Errors.LP_IS_PAUSED);
@@ -238,15 +240,15 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
     DataTypes.ReserveData storage reserve = _reserves[asset];
 
     // (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(onBehalfOf, reserve);
-    uint256 variableDebt = IERC20(reserve.variableDebtTokenAddress).balanceOf(user);
+    uint256 variableDebt = IERC20(reserve.variableDebtTokenAddress).balanceOf(onBehalfOf);
     // DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(rateMode);
 
     ValidationLogic.validateRepay(
       reserve,
       amount,
-      interestRateMode,
+    //   interestRateMode,
       onBehalfOf,
-      stableDebt,
+    //   stableDebt,
       variableDebt
     );
 
@@ -258,20 +260,20 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
 
     reserve.updateState();
 
-    if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
-      IStableDebtToken(reserve.stableDebtTokenAddress).burn(onBehalfOf, paybackAmount);
-    } else {
+    // if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
+    //   IStableDebtToken(reserve.stableDebtTokenAddress).burn(onBehalfOf, paybackAmount);
+    // } else {
       IVariableDebtToken(reserve.variableDebtTokenAddress).burn(
         onBehalfOf,
         paybackAmount,
         reserve.variableBorrowIndex
       );
-    }
+    // }
 
     address eToken = reserve.eTokenAddress;
     reserve.updateInterestRates(asset, eToken, paybackAmount, 0);
 
-    if (stableDebt.add(variableDebt).sub(paybackAmount) == 0) {
+    if (variableDebt.sub(paybackAmount) == 0) {
       _usersConfig[onBehalfOf].setBorrowing(reserve.id, false);
     }
 
@@ -338,10 +340,12 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
     require(!_paused, Errors.LP_IS_PAUSED);
 
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[user];
+    DataTypes.UserConfigurationMap storage liquidatorConfig = _usersConfig[msg.sender];
     LiquidationLogic.liquidationCall(
         _reserves,
         _reservesList,
         userConfig,
+        liquidatorConfig,
         DataTypes.LiquidationCallParams(
             _reservesCount,
             collateralAsset,
@@ -661,7 +665,7 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
   /**
    * @dev Returns the cached IMarket connected to this contract
    **/
-  function getMarket() external view override returns (IMarket) {
+  function getMarket() external view returns (IMarket) {
     return _market;
   }
 
@@ -697,7 +701,7 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
     address eTokenAddress,
     address variableDebtAddress,
     address interestRateStrategyAddress
-  ) external override onlyLendingPoolConfigurator {
+  ) external override onlyOwner {
     require(Address.isContract(asset), Errors.LP_NOT_CONTRACT);
     _reserves[asset].init(
       eTokenAddress,
@@ -716,7 +720,7 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override
-    onlyLendingPoolConfigurator
+    onlyOwner
   {
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
@@ -730,7 +734,7 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
   function setConfiguration(address asset, uint256 configuration)
     external
     override
-    onlyLendingPoolConfigurator
+    onlyOwner
   {
     _reserves[asset].configuration.data = configuration;
   }
@@ -740,7 +744,7 @@ contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
    * - Only callable by the LendingPoolConfigurator contract
    * @param val `true` to pause the reserve, `false` to un-pause it
    */
-  function setPause(bool val) external override onlyLendingPoolConfigurator {
+  function setPause(bool val) external override onlyOwner {
     _paused = val;
     if (_paused) {
       emit Paused();

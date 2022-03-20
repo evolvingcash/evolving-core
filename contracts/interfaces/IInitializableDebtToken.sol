@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import './ILendingPool.sol';
+import './IPool.sol';
 import './IAaveIncentivesController.sol';
 
 /**
@@ -40,7 +40,7 @@ interface IInitializableDebtToken {
    * @param debtTokenSymbol The symbol of the token
    */
   function initialize(
-    ILendingPool pool,
+    IPool pool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
