@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import '../libraries/types/DataTypes.sol';
 
-interface IPool {
+interface IBank {
   /**
    * @dev Emitted on deposit()
    * @param reserve The address of the underlying asset of the reserve

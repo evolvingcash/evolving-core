@@ -13,7 +13,7 @@ import './interfaces/IEToken.sol';
 import './interfaces/IVariableDebtToken.sol';
 import './interfaces/IFlashLoanReceiver.sol';
 import './interfaces/IPriceOracleGetter.sol';
-import './interfaces/IPool.sol';
+import './interfaces/IBank.sol';
 import './libraries/helpers/Errors.sol';
 import './libraries/math/WadRayMath.sol';
 import './libraries/math/PercentageMath.sol';
@@ -25,10 +25,10 @@ import './libraries/logic/LiquidationLogic.sol';
 import './libraries/configuration/ReserveConfiguration.sol';
 import './libraries/configuration/UserConfiguration.sol';
 import './libraries/types/DataTypes.sol';
-import './PoolStorage.sol';
+import './BankStorage.sol';
 
 /**
- * @title Pool contract
+ * @title Bank contract
  * @dev Main point of interaction with an Evolving protocol's market
  * - Users can:
  *   # Deposit
@@ -42,7 +42,7 @@ import './PoolStorage.sol';
  *   LendingPoolAddressesProvider
  * @author Evolving
  **/
-contract Pool is OwnableUpgradeable, UUPSUpgradeable, IPool, PoolStorage {
+contract Bank is OwnableUpgradeable, UUPSUpgradeable, IBank, BankStorage {
   using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;

@@ -7,7 +7,7 @@ import './libraries/logic/ReserveLogic.sol';
 import './interfaces/IMarket.sol';
 import './libraries/types/DataTypes.sol';
 
-contract PoolStorage {
+contract BankStorage {
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
