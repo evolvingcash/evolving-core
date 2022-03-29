@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 // import './IMarket.sol';
-import './IPool.sol';
+import './IBank.sol';
 
 /**
  * @title IFlashLoanReceiver interface
@@ -21,5 +21,5 @@ interface IFlashLoanReceiver {
 
   // function ADDRESSES_PROVIDER() external view returns (ILendingPoolAddressesProvider);
 
-  function LENDING_POOL() external view returns (IPool);
+  function LENDING_POOL() external view returns (IBank);
 }

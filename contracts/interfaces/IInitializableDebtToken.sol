@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import './IPool.sol';
+import './IBank.sol';
 import './IAaveIncentivesController.sol';
 
 /**
@@ -32,7 +32,7 @@ interface IInitializableDebtToken {
 
   /**
    * @dev Initializes the debt token.
-   * @param pool The address of the lending pool where this eToken will be used
+   * @param bank The address of the lending bank where this eToken will be used
    * @param underlyingAsset The address of the underlying asset of this eToken (E.g. WETH for aWETH)
    * @param incentivesController The smart contract managing potential incentives distribution
    * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
@@ -40,7 +40,7 @@ interface IInitializableDebtToken {
    * @param debtTokenSymbol The symbol of the token
    */
   function initialize(
-    IPool pool,
+    IBank bank,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,

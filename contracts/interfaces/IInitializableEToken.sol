@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import './IPool.sol';
+import './IBank.sol';
 import './IAaveIncentivesController.sol';
 
 /**
@@ -34,7 +34,7 @@ interface IInitializableEToken {
 
   /**
    * @dev Initializes the eToken
-   * @param pool The address of the lending pool where this eToken will be used
+   * @param bank The address of the lending bank where this eToken will be used
    * @param treasury The address of the Aave treasury, receiving the fees on this eToken
    * @param underlyingAsset The address of the underlying asset of this eToken (E.g. WETH for aWETH)
    * @param incentivesController The smart contract managing potential incentives distribution
@@ -43,7 +43,7 @@ interface IInitializableEToken {
    * @param eTokenSymbol The symbol of the eToken
    */
   function initialize(
-    IPool pool,
+    IBank bank,
     address treasury,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,

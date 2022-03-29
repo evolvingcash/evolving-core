@@ -8,7 +8,7 @@ import '../types/DataTypes.sol';
 import '../configuration/ReserveConfiguration.sol';
 import '../../interfaces/IPriceOracleGetter.sol';
 import '../../interfaces/IEToken.sol';
-import '../../interfaces/IPool.sol';
+import '../../interfaces/IBank.sol';
 import '../../interfaces/IVariableDebtToken.sol';
 
 /**

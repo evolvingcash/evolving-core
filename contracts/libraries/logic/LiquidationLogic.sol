@@ -10,7 +10,7 @@ import '../math/WadRayMath.sol';
 import '../math/PercentageMath.sol';
 import '../configuration/ReserveConfiguration.sol';
 import '../configuration/UserConfiguration.sol';
-import '../../interfaces/IPool.sol';
+import '../../interfaces/IBank.sol';
 import '../../interfaces/IPriceOracleGetter.sol';
 import '../../interfaces/IEToken.sol';
 import '../../interfaces/IVariableDebtToken.sol';
