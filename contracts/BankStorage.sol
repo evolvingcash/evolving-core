@@ -19,7 +19,7 @@ contract BankKeeperStorage {
   // emergency admin address
   address internal emergencyAdmin;
   // price oracle address
-  address internal priceOracle;
+  address internal _priceOracle;
   // lending rate oracle address
   address internal lendingRateOracle;
 }
@@ -35,8 +35,8 @@ contract BankStorage is BankKeeperStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  IMarket internal _market;
-//   address internal _priceOracle;
+  // IMarket internal _market;
+  // address internal _priceOracle;
 
   mapping(address => DataTypes.ReserveData) internal _reserves;
   mapping(address => DataTypes.UserConfigurationMap) internal _usersConfig;

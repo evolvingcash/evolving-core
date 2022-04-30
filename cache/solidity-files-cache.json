@@ -10,7 +10,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -46,7 +46,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -84,7 +84,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -126,7 +126,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -164,7 +164,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -205,7 +205,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -243,7 +243,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -281,7 +281,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -319,7 +319,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -360,7 +360,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -398,7 +398,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -439,7 +439,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -481,7 +481,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -519,7 +519,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -562,7 +562,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -602,7 +602,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -640,7 +640,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -678,7 +678,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -716,7 +716,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -746,7 +746,7 @@
       ]
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/libraries/logic/ReserveLogic.sol": {
-      "lastModificationDate": 1647771713475,
+      "lastModificationDate": 1648561298230,
       "contentHash": "1374d4c15f982e2587592a8b8f955b4b",
       "sourceName": "contracts/libraries/logic/ReserveLogic.sol",
       "solcConfig": {
@@ -754,7 +754,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -804,7 +804,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -851,7 +851,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -901,7 +901,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -949,7 +949,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1001,7 +1001,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1042,7 +1042,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1083,7 +1083,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1121,7 +1121,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1161,7 +1161,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1201,7 +1201,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1239,7 +1239,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1277,7 +1277,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1321,7 +1321,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1359,7 +1359,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1397,7 +1397,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1438,7 +1438,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1476,7 +1476,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1517,7 +1517,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1555,7 +1555,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1598,7 +1598,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1636,7 +1636,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1674,7 +1674,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1712,7 +1712,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1753,7 +1753,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1791,7 +1791,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1831,7 +1831,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1873,7 +1873,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1913,7 +1913,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1951,7 +1951,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -1979,15 +1979,15 @@
       "artifacts": []
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/Bank.sol": {
-      "lastModificationDate": 1648553136141,
-      "contentHash": "de4e4e4dc41b5dd74482f66185006dec",
+      "lastModificationDate": 1651324221702,
+      "contentHash": "e1ac3e84ef3e269eac3788a2f5cd6a01",
       "sourceName": "contracts/Bank.sol",
       "solcConfig": {
         "version": "0.8.9",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -2032,7 +2032,8 @@
         "./libraries/configuration/ReserveConfiguration.sol",
         "./libraries/configuration/UserConfiguration.sol",
         "./libraries/types/DataTypes.sol",
-        "./BankStorage.sol"
+        "./BankStorage.sol",
+        "./BankKeeper.sol"
       ],
       "versionPragmas": [
         "^0.8.0"
@@ -2042,15 +2043,15 @@
       ]
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/interfaces/IBank.sol": {
-      "lastModificationDate": 1648553130341,
-      "contentHash": "c741131eaa43dd130f2fa11e3cb37b81",
+      "lastModificationDate": 1651321356358,
+      "contentHash": "f665132a6e505a782905b26de2831d10",
       "sourceName": "contracts/interfaces/IBank.sol",
       "solcConfig": {
         "version": "0.8.9",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -2082,15 +2083,15 @@
       ]
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/BankStorage.sol": {
-      "lastModificationDate": 1648553074299,
-      "contentHash": "853c247273d1bdc447cb14a09abb155d",
+      "lastModificationDate": 1651323419288,
+      "contentHash": "2b2f5e4f0b70e3484b661e6002fc028f",
       "sourceName": "contracts/BankStorage.sol",
       "solcConfig": {
         "version": "0.8.9",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 800
+            "runs": 200
           },
           "metadata": {
             "bytecodeHash": "none"
@@ -2122,7 +2123,93 @@
         "^0.8.0"
       ],
       "artifacts": [
+        "BankKeeperStorage",
         "BankStorage"
+      ]
+    },
+    "/Users/guotie/guotie/opensource/evolving-core/contracts/BankKeeper.sol": {
+      "lastModificationDate": 1651324194813,
+      "contentHash": "eb6e77c48441aa93e02575fc109be15a",
+      "sourceName": "contracts/BankKeeper.sol",
+      "solcConfig": {
+        "version": "0.8.9",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/interfaces/IERC20.sol",
+        "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
+        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "./interfaces/IBank.sol",
+        "./interfaces/IBankKeeper.sol",
+        "./BankStorage.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BankKeeper"
+      ]
+    },
+    "/Users/guotie/guotie/opensource/evolving-core/contracts/interfaces/IBankKeeper.sol": {
+      "lastModificationDate": 1651324176445,
+      "contentHash": "e90f25a235e232ae968237fac7d80b77",
+      "sourceName": "contracts/interfaces/IBankKeeper.sol",
+      "solcConfig": {
+        "version": "0.8.9",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/types/DataTypes.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IBankKeeper"
       ]
     }
   }

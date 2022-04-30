@@ -8,7 +8,7 @@ import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 
-import './interfaces/IMarket.sol';
+// import './interfaces/IMarket.sol';
 import './interfaces/IEToken.sol';
 import './interfaces/IVariableDebtToken.sol';
 import './interfaces/IFlashLoanReceiver.sol';
@@ -43,7 +43,7 @@ import './BankKeeper.sol';
  *   LendingPoolAddressesProvider
  * @author Evolving
  **/
-contract Bank is UUPSUpgradeable, BankKeeper, IBank {
+contract Bank is UUPSUpgradeable, IBank, BankKeeper {
   using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -53,28 +53,15 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
 
   uint256 public constant REVISION = 0x2;
 
-//   modifier onlyLendingPoolConfigurator() {
-//     _onlyLendingPoolConfigurator();
-//     _;
-//   }
-
-//   function _onlyLendingPoolConfigurator() internal view {
-//     require(
-//       _market.getLendingPoolConfigurator() == msg.sender,
-//       Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
-//     );
-//   }
-
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
   /**
    * @dev Function is invoked by the proxy contract when the Bank contract is created 
    * - Caching the address of the LendingPoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
-   * @param provider The address of the LendingPoolAddressesProvider
    **/
-  function initialize(IMarket provider) public initializer {
-    _market = provider;
+  function initialize() public initializer {
+    // _market = provider;
     _flashLoanPremiumTotal = 1;
     _maxNumberOfReserves = 128;
   }
@@ -157,7 +144,7 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
       _usersConfig[msg.sender],
       _reservesList,
       _reservesCount,
-      _market.getPriceOracle()
+      _priceOracle
     );
 
     reserve.updateState();
@@ -209,7 +196,7 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
         amount,
         referralCode,
         true,
-        _market.getPriceOracle(),
+        _priceOracle,
         _maxNumberOfReserves
       )
     );
@@ -303,7 +290,7 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
       _usersConfig[msg.sender],
       _reservesList,
       _reservesCount,
-      _market.getPriceOracle()
+      _priceOracle
     );
 
     _usersConfig[msg.sender].setUsingAsCollateral(reserve.id, useAsCollateral);
@@ -349,7 +336,7 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
             user,
             debtToCover,
             receiveEToken,
-            _market.getPriceOracle()
+            _priceOracle
         )
     );
   }
@@ -456,7 +443,7 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
             // modes[vars.i],
             referralCode,
             false,
-            _market.getPriceOracle(),
+            _priceOracle,
             _maxNumberOfReserves
           )
         );
@@ -499,7 +486,7 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
       _usersConfig[from],
       _reservesList,
       _reservesCount,
-      _market.getPriceOracle()
+      _priceOracle
     );
 
     uint256 reserveId = _reserves[asset].id;
@@ -572,7 +559,7 @@ contract Bank is UUPSUpgradeable, BankKeeper, IBank {
       _usersConfig[user],
       _reservesList,
       _reservesCount,
-      _market.getPriceOracle()
+      _priceOracle
     );
 
     availableBorrowsETH = GenericLogic.calculateAvailableBorrowsETH(
