@@ -104,16 +104,6 @@ interface IBank {
   );
 
   /**
-   * @dev Emitted when the pause is triggered.
-   */
-  event Paused();
-
-  /**
-   * @dev Emitted when the pause is lifted.
-   */
-  event Unpaused();
-
-  /**
    * @dev Emitted when a borrower is liquidated. This event is emitted by the LendingPool via
    * LendingPoolCollateral manager using a DELEGATECALL
    * This allows to have the events in the generated ABI for LendingPool.
@@ -306,28 +296,6 @@ interface IBank {
       uint256 healthFactor
     );
 
-  function initReserve(
-    address reserve,
-    address eTokenAddress,
-    address variableDebtAddress,
-    address interestRateStrategyAddress
-  ) external;
-
-  function setReserveInterestRateStrategyAddress(address reserve, address rateStrategyAddress)
-    external;
-
-  function setConfiguration(address reserve, uint256 configuration) external;
-
-  /**
-   * @dev Returns the configuration of the reserve
-   * @param asset The address of the underlying asset of the reserve
-   * @return The configuration of the reserve
-   **/
-  function getConfiguration(address asset)
-    external
-    view
-    returns (DataTypes.ReserveConfigurationMap memory);
-
   /**
    * @dev Returns the configuration of the user across all the reserves
    * @param user The user address
@@ -372,7 +340,4 @@ interface IBank {
 
   // function getAddressesProvider() external view returns (ILendingPoolAddressesProvider);
 
-  function setPause(bool val) external;
-
-  function paused() external view returns (bool);
 }

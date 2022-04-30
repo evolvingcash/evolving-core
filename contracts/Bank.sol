@@ -26,6 +26,7 @@ import './libraries/configuration/ReserveConfiguration.sol';
 import './libraries/configuration/UserConfiguration.sol';
 import './libraries/types/DataTypes.sol';
 import './BankStorage.sol';
+import './BankKeeper.sol';
 
 /**
  * @title Bank contract
@@ -42,7 +43,7 @@ import './BankStorage.sol';
  *   LendingPoolAddressesProvider
  * @author Evolving
  **/
-contract Bank is OwnableUpgradeable, UUPSUpgradeable, IBank, BankStorage {
+contract Bank is UUPSUpgradeable, BankKeeper, IBank {
   using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -67,8 +68,7 @@ contract Bank is OwnableUpgradeable, UUPSUpgradeable, IBank, BankStorage {
   function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
   /**
-   * @dev Function is invoked by the proxy contract when the LendingPool contract is added to the
-   * LendingPoolAddressesProvider of the market.
+   * @dev Function is invoked by the proxy contract when the Bank contract is created 
    * - Caching the address of the LendingPoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
    * @param provider The address of the LendingPoolAddressesProvider
@@ -583,20 +583,6 @@ contract Bank is OwnableUpgradeable, UUPSUpgradeable, IBank, BankStorage {
   }
 
   /**
-   * @dev Returns the configuration of the reserve
-   * @param asset The address of the underlying asset of the reserve
-   * @return The configuration of the reserve
-   **/
-  function getConfiguration(address asset)
-    external
-    view
-    override
-    returns (DataTypes.ReserveConfigurationMap memory)
-  {
-    return _reserves[asset].configuration;
-  }
-
-  /**
    * @dev Returns the configuration of the user across all the reserves
    * @param user The user address
    * @return The configuration of the user
@@ -642,9 +628,9 @@ contract Bank is OwnableUpgradeable, UUPSUpgradeable, IBank, BankStorage {
   /**
    * @dev Returns if the LendingPool is paused
    */
-  function paused() external view override returns (bool) {
-    return _paused;
-  }
+  // function paused() external view override returns (bool) {
+  //   return _paused;
+  // }
 
   /**
    * @dev Returns the list of the initialized reserves
@@ -661,9 +647,9 @@ contract Bank is OwnableUpgradeable, UUPSUpgradeable, IBank, BankStorage {
   /**
    * @dev Returns the cached IMarket connected to this contract
    **/
-  function getMarket() external view returns (IMarket) {
-    return _market;
-  }
+  // function getMarket() external view returns (IMarket) {
+  //   return _market;
+  // }
 
   /**
    * @dev Returns the fee on flash loans 
@@ -677,90 +663,5 @@ contract Bank is OwnableUpgradeable, UUPSUpgradeable, IBank, BankStorage {
    */
   function MAX_NUMBER_RESERVES() public view returns (uint256) {
     return _maxNumberOfReserves;
-  }
-
-  //----------------------------------------------------------------------------
-  // ADMIN FUNCTIONS
-  //----------------------------------------------------------------------------
-
-  /**
-   * @dev Initializes a reserve, activating it, assigning an eToken and debt tokens and an
-   * interest rate strategy
-   * - Only callable by the LendingPoolConfigurator contract
-   * @param asset The address of the underlying asset of the reserve
-   * @param eTokenAddress The address of the eToken that will be assigned to the reserve
-   * @param eTokenAddress The address of the VariableDebtToken that will be assigned to the reserve
-   * @param interestRateStrategyAddress The address of the interest rate strategy contract
-   **/
-  function initReserve(
-    address asset,
-    address eTokenAddress,
-    address variableDebtAddress,
-    address interestRateStrategyAddress
-  ) external override onlyOwner {
-    require(Address.isContract(asset), Errors.LP_NOT_CONTRACT);
-    _reserves[asset].init(
-      eTokenAddress,
-      variableDebtAddress,
-      interestRateStrategyAddress
-    );
-    _addReserveToList(asset);
-  }
-
-  /**
-   * @dev Updates the address of the interest rate strategy contract
-   * - Only callable by the LendingPoolConfigurator contract
-   * @param asset The address of the underlying asset of the reserve
-   * @param rateStrategyAddress The address of the interest rate strategy contract
-   **/
-  function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
-    external
-    override
-    onlyOwner
-  {
-    _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
-  }
-
-  /**
-   * @dev Sets the configuration bitmap of the reserve as a whole
-   * - Only callable by the LendingPoolConfigurator contract
-   * @param asset The address of the underlying asset of the reserve
-   * @param configuration The new configuration bitmap
-   **/
-  function setConfiguration(address asset, uint256 configuration)
-    external
-    override
-    onlyOwner
-  {
-    _reserves[asset].configuration.data = configuration;
-  }
-
-  /**
-   * @dev Set the _pause state of a reserve
-   * - Only callable by the LendingPoolConfigurator contract
-   * @param val `true` to pause the reserve, `false` to un-pause it
-   */
-  function setPause(bool val) external override onlyOwner {
-    _paused = val;
-    if (_paused) {
-      emit Paused();
-    } else {
-      emit Unpaused();
-    }
-  }
-
-  function _addReserveToList(address asset) internal {
-    uint256 reservesCount = _reservesCount;
-
-    require(reservesCount < _maxNumberOfReserves, Errors.LP_NO_MORE_RESERVES_ALLOWED);
-
-    bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
-
-    if (!reserveAlreadyAdded) {
-      _reserves[asset].id = uint8(reservesCount);
-      _reservesList[reservesCount] = asset;
-
-      _reservesCount = reservesCount + 1;
-    }
   }
 }

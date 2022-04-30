@@ -7,7 +7,30 @@ import './libraries/logic/ReserveLogic.sol';
 import './interfaces/IMarket.sol';
 import './libraries/types/DataTypes.sol';
 
-contract BankStorage {
+/**
+ * @title BankKeeperStorage
+ * @author Evolving
+ * @notice Contract used as storage of the BankKeeper contract.
+ * @dev It defines the storage layout of the BankKeeper contract.
+ */
+contract BankKeeperStorage {
+  // bank admin address
+  address internal bankAdmin;
+  // emergency admin address
+  address internal emergencyAdmin;
+  // price oracle address
+  address internal priceOracle;
+  // lending rate oracle address
+  address internal lendingRateOracle;
+}
+
+/**
+ * @title BankStorage
+ * @author Evolving
+ * @notice Contract used as storage of the Bank contract.
+ * @dev It defines the storage layout of the Bank contract.
+ */
+contract BankStorage is BankKeeperStorage {
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
