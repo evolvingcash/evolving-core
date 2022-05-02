@@ -62,6 +62,10 @@ contract Bank is UUPSUpgradeable, IBank, BankKeeper {
    **/
   function initialize() public initializer {
     // _market = provider;
+    __Ownable_init();
+    
+    bankAdmin = msg.sender;
+    emergencyAdmin = msg.sender;
     _flashLoanPremiumTotal = 1;
     _maxNumberOfReserves = 128;
   }
@@ -632,11 +636,18 @@ contract Bank is UUPSUpgradeable, IBank, BankKeeper {
   }
 
   /**
-   * @dev Returns the cached IMarket connected to this contract
+   * @dev Returns the configuration of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return The configuration of the reserve
    **/
-  // function getMarket() external view returns (IMarket) {
-  //   return _market;
-  // }
+  function getConfiguration(address asset)
+    external
+    view
+    override
+    returns (DataTypes.ReserveConfigurationMap memory)
+  {
+    return _reserves[asset].configuration;
+  }
 
   /**
    * @dev Returns the fee on flash loans 

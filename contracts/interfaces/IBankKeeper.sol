@@ -39,6 +39,13 @@ interface IBankKeeper {
     bytes params;
   }
 
+  event ConfigurationAdminUpdated(address indexed newAddress);
+  event EmergencyAdminUpdated(address indexed newAddress);
+  // event PoolConfiguratorUpdated(address indexed newAddress);
+  // event PoolCollateralManagerUpdated(address indexed newAddress);
+  event PriceOracleUpdated(address indexed newAddress);
+  event LendingRateOracleUpdated(address indexed newAddress);
+
   /**
    * @dev Emitted when the pause is triggered.
    */
@@ -48,20 +55,6 @@ interface IBankKeeper {
    * @dev Emitted when the pause is lifted.
    */
   event Unpaused();
-
-  /**
-   * @dev Emitted when a reserve is initialized.
-   * @param asset The address of the underlying asset of the reserve
-   * @param eToken The address of the associated eToken contract
-   * @param variableDebtToken The address of the associated variable rate debt token
-   * @param interestRateStrategyAddress The address of the interest rate strategy for the reserve
-   **/
-  event ReserveInitialized(
-    address indexed asset,
-    address indexed eToken,
-    address variableDebtToken,
-    address interestRateStrategyAddress
-  );
 
   /**
    * @dev Emitted when borrowing is enabled on a reserve
@@ -168,16 +161,6 @@ interface IBankKeeper {
   function setReserveInterestRateStrategyAddress(address reserve, address rateStrategyAddress)
     external;
 
-  /**
-   * @dev Returns the configuration of the reserve
-   * @param asset The address of the underlying asset of the reserve
-   * @return The configuration of the reserve
-   **/
-  function getConfiguration(address asset)
-    external
-    view
-    returns (DataTypes.ReserveConfigurationMap memory);
-
   function setConfiguration(address reserve, uint256 configuration) external;
 
   function setPause(bool val) external;
@@ -208,4 +191,20 @@ interface IBankKeeper {
   function unfreezeReserve(address asset) external;
 
   function setReserveFactor(address asset, uint256 reserveFactor) external;
+
+  function getBankAdmin() external view returns (address);
+
+  function setBankAdmin(address admin) external;
+
+  function getEmergencyAdmin() external view returns (address);
+
+  function setEmergencyAdmin(address admin) external;
+
+  function getPriceOracle() external view returns (address);
+
+  function setPriceOracle(address priceOracle) external;
+
+  function getLendingRateOracle() external view returns (address);
+
+  function setLendingRateOracle(address lendingRateOracle) external;
 }

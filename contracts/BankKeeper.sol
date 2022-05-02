@@ -45,7 +45,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
     address eTokenAddress,
     address variableDebtAddress,
     address interestRateStrategyAddress
-  ) external override onlyOwner {
+  ) external override onlyPoolAdmin {
     require(Address.isContract(asset), Errors.LP_NOT_CONTRACT);
     _reserves[asset].init(
       eTokenAddress,
@@ -74,10 +74,9 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
    * @param asset The address of the underlying asset of the reserve
    * @return The configuration of the reserve
    **/
-  function getConfiguration(address asset)
-    public
+  function _getConfiguration(address asset)
+    internal
     view
-    override
     returns (DataTypes.ReserveConfigurationMap memory)
   {
     return _reserves[asset].configuration;
@@ -141,7 +140,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
     external
     onlyPoolAdmin
   {
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     currentConfig.setBorrowingEnabled(true);
 
@@ -155,7 +154,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
    * @param asset The address of the underlying asset of the reserve
    **/
   function disableBorrowingOnReserve(address asset) external onlyPoolAdmin {
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     currentConfig.setBorrowingEnabled(false);
 
@@ -178,7 +177,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
     uint256 liquidationThreshold,
     uint256 liquidationBonus
   ) external onlyPoolAdmin {
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     //validation of the parameters: the LTV can
     //only be lower or equal than the liquidation threshold
@@ -221,7 +220,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
    * @param asset The address of the underlying asset of the reserve
    **/
   function activateReserve(address asset) external onlyPoolAdmin {
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     currentConfig.setActive(true);
 
@@ -237,7 +236,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
   function deactivateReserve(address asset) external onlyPoolAdmin {
     _checkNoLiquidity(asset);
 
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     currentConfig.setActive(false);
 
@@ -252,7 +251,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
    * @param asset The address of the underlying asset of the reserve
    **/
   function freezeReserve(address asset) external onlyPoolAdmin {
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     currentConfig.setFrozen(true);
 
@@ -266,7 +265,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
    * @param asset The address of the underlying asset of the reserve
    **/
   function unfreezeReserve(address asset) external onlyPoolAdmin {
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     currentConfig.setFrozen(false);
 
@@ -281,7 +280,7 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
    * @param reserveFactor The new reserve factor of the reserve
    **/
   function setReserveFactor(address asset, uint256 reserveFactor) external onlyPoolAdmin {
-    DataTypes.ReserveConfigurationMap memory currentConfig = getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory currentConfig = _getConfiguration(asset);
 
     currentConfig.setReserveFactor(reserveFactor);
 
@@ -299,5 +298,46 @@ contract BankKeeper is IBankKeeper, OwnableUpgradeable, BankStorage {
       availableLiquidity == 0 && reserveData.currentLiquidityRate == 0,
       Errors.LPC_RESERVE_LIQUIDITY_NOT_0
     );
+  }
+
+  /**
+   * @dev The functions below are getters/setters of addresses that are outside the context
+   * of the protocol hence the upgradable proxy pattern is not used
+   **/
+
+  function getBankAdmin() external view override returns (address) {
+    return bankAdmin;
+  }
+
+  function setBankAdmin(address admin) external override onlyOwner {
+    bankAdmin = admin;
+    emit ConfigurationAdminUpdated(admin);
+  }
+
+  function getEmergencyAdmin() external view override returns (address) {
+    return emergencyAdmin;
+  }
+
+  function setEmergencyAdmin(address admin) external override onlyOwner {
+    emergencyAdmin = admin;
+    emit EmergencyAdminUpdated(emergencyAdmin);
+  }
+
+  function getPriceOracle() external view override returns (address) {
+    return _priceOracle;
+  }
+
+  function setPriceOracle(address oracle) external override onlyOwner {
+    _priceOracle = oracle;
+    emit PriceOracleUpdated(_priceOracle);
+  }
+
+  function getLendingRateOracle() external view override returns (address) {
+    return lendingRateOracle;
+  }
+
+  function setLendingRateOracle(address lendingRateOracle) external override onlyOwner {
+    lendingRateOracle = lendingRateOracle;
+    emit LendingRateOracleUpdated(lendingRateOracle);
   }
 }

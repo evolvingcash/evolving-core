@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 
 import './interfaces/IBank.sol';
 import './interfaces/IEToken.sol';
@@ -16,13 +18,23 @@ import './libraries/configuration/ReserveConfiguration.sol';
  * @dev helper create bank list asset and upgrade bank/etoken/dtoken/etc
  * @author Evolving
  **/
-contract BankHelper is IBankHelper {
+contract BankHelper is UUPSUpgradeable, OwnableUpgradeable, IBankHelper {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+
+  function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
+  /**
+   * @dev Function is invoked by the proxy contract when the BankHelper is created 
+   **/
+  function initialize() public initializer {
+    // _market = provider;
+    __Ownable_init();
+  }
 
   /**
    * @dev Initializes reserves in batch
    **/
-  function batchInitReserve(IBankKeeper pool, InitReserveInput[] calldata input) external { // onlyPoolAdmin {
+  function batchInitReserve(IBankKeeper pool, InitReserveInput[] calldata input) external onlyOwner {
     for (uint256 i = 0; i < input.length; i++) {
       _initReserve(pool, input[i]);
     }
@@ -68,7 +80,7 @@ contract BankHelper is IBankHelper {
     );
 
     DataTypes.ReserveConfigurationMap memory currentConfig =
-      pool.getConfiguration(input.underlyingAsset);
+      IBank(address(pool)).getConfiguration(input.underlyingAsset);
 
     currentConfig.setDecimals(input.underlyingAssetDecimals);
 
@@ -88,10 +100,10 @@ contract BankHelper is IBankHelper {
   /**
    * @dev Updates the eToken implementation for the reserve
    **/
-  function updateEToken(IBankKeeper pool, UpdateETokenInput calldata input) external { // onlyPoolAdmin {
+  function updateEToken(IBank pool, UpdateETokenInput calldata input) external onlyOwner {
     DataTypes.ReserveData memory reserveData = pool.getReserveData(input.asset);
 
-    (, , , uint256 decimals, ) = pool.getConfiguration().getParamsMemory();
+    (, , , uint256 decimals, ) = pool.getConfiguration(input.asset).getParamsMemory();
 
     bytes memory encodedCall = abi.encodeWithSelector(
         IInitializableEToken.initialize.selector,

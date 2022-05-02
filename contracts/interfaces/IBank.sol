@@ -340,4 +340,13 @@ interface IBank {
 
   // function getAddressesProvider() external view returns (ILendingPoolAddressesProvider);
 
+  /**
+   * @dev Returns the configuration of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return The configuration of the reserve
+   **/
+  function getConfiguration(address asset)
+    external
+    view
+    returns (DataTypes.ReserveConfigurationMap memory);
 }
