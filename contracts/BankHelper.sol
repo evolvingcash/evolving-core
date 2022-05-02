@@ -126,6 +126,41 @@ contract BankHelper is UUPSUpgradeable, OwnableUpgradeable, IBankHelper {
     emit ETokenUpgraded(input.asset, reserveData.eTokenAddress, input.implementation);
   }
 
+  /**
+   * @dev Updates the variable debt token implementation for the asset
+   **/
+  function updateVariableDebtToken(IBank pool, UpdateDebtTokenInput calldata input)
+    external
+    onlyOwner
+  {
+    DataTypes.ReserveData memory reserveData = pool.getReserveData(input.asset);
+
+    (, , , uint256 decimals, ) = pool.getConfiguration(input.asset).getParamsMemory();
+
+    bytes memory encodedCall = abi.encodeWithSelector(
+        IInitializableDebtToken.initialize.selector,
+        pool,
+        input.asset,
+        input.incentivesController,
+        decimals,
+        input.name,
+        input.symbol,
+        input.params
+      );
+
+    _upgradeTokenImplementation(
+      reserveData.variableDebtTokenAddress,
+      input.implementation,
+      encodedCall
+    );
+
+    emit VariableDebtTokenUpgraded(
+      input.asset,
+      reserveData.variableDebtTokenAddress,
+      input.implementation
+    );
+  }
+
   function _initTokenWithProxy(address implementation, bytes memory initParams)
     internal
     returns (address)

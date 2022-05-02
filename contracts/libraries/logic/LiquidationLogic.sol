@@ -18,7 +18,7 @@ import '../../interfaces/IVariableDebtToken.sol';
 /**
  * @title Liquidation logic library
  * @author Evolving
- * @title Implements protocol-level borrow logic
+ * @title Implements protocol-level liquidate logic
  */
 library LiquidationLogic {
   using SafeERC20 for IERC20;

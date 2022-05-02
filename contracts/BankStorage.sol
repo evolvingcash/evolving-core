@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import './libraries/configuration/UserConfiguration.sol';
 import './libraries/configuration/ReserveConfiguration.sol';
 import './libraries/logic/ReserveLogic.sol';
-import './interfaces/IMarket.sol';
 import './libraries/types/DataTypes.sol';
 
 /**

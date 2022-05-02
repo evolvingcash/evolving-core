@@ -21,6 +21,7 @@ import './libraries/logic/ReserveLogic.sol';
 import './libraries/logic/GenericLogic.sol';
 import './libraries/logic/ValidationLogic.sol';
 import './libraries/logic/BorrowLogic.sol';
+import './libraries/logic/RepayLogic.sol';
 import './libraries/logic/LiquidationLogic.sol';
 import './libraries/configuration/ReserveConfiguration.sol';
 import './libraries/configuration/UserConfiguration.sol';
@@ -225,52 +226,9 @@ contract Bank is UUPSUpgradeable, IBank, BankKeeper {
     require(!_paused, Errors.LP_IS_PAUSED);
 
     DataTypes.ReserveData storage reserve = _reserves[asset];
+    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[onBehalfOf];
 
-    // (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(onBehalfOf, reserve);
-    uint256 variableDebt = IERC20(reserve.variableDebtTokenAddress).balanceOf(onBehalfOf);
-    // DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(rateMode);
-
-    ValidationLogic.validateRepay(
-      reserve,
-      amount,
-    //   interestRateMode,
-      onBehalfOf,
-    //   stableDebt,
-      variableDebt
-    );
-
-    uint256 paybackAmount = variableDebt;
-
-    if (amount < paybackAmount) {
-      paybackAmount = amount;
-    }
-
-    reserve.updateState();
-
-    // if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
-    //   IStableDebtToken(reserve.stableDebtTokenAddress).burn(onBehalfOf, paybackAmount);
-    // } else {
-      IVariableDebtToken(reserve.variableDebtTokenAddress).burn(
-        onBehalfOf,
-        paybackAmount,
-        reserve.variableBorrowIndex
-      );
-    // }
-
-    address eToken = reserve.eTokenAddress;
-    reserve.updateInterestRates(asset, eToken, paybackAmount, 0);
-
-    if (variableDebt.sub(paybackAmount) == 0) {
-      _usersConfig[onBehalfOf].setBorrowing(reserve.id, false);
-    }
-
-    IERC20(asset).safeTransferFrom(msg.sender, eToken, paybackAmount);
-
-    IEToken(eToken).handleRepayment(msg.sender, paybackAmount);
-
-    emit Repay(asset, onBehalfOf, msg.sender, paybackAmount);
-
-    return paybackAmount;
+    return RepayLogic.repay(reserve, userConfig, asset, amount, onBehalfOf);
   }
 
   /**

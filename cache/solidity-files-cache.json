@@ -472,44 +472,6 @@
         "UUPSUpgradeable"
       ]
     },
-    "/Users/guotie/guotie/opensource/evolving-core/contracts/interfaces/IMarket.sol": {
-      "lastModificationDate": 1647753709829,
-      "contentHash": "e28359b25fa88598f392e657a9bfdd25",
-      "sourceName": "contracts/interfaces/IMarket.sol",
-      "solcConfig": {
-        "version": "0.8.9",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "none"
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "IMarket"
-      ]
-    },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/interfaces/IEToken.sol": {
       "lastModificationDate": 1647085929122,
       "contentHash": "d46fecbc6facb2d1bdbccbbea7b2d31d",
@@ -941,8 +903,8 @@
       ]
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/libraries/logic/LiquidationLogic.sol": {
-      "lastModificationDate": 1648560788220,
-      "contentHash": "207451d26c47f7b36abd1123c2aa8069",
+      "lastModificationDate": 1651465318917,
+      "contentHash": "7226df281c04dc67c555806896c07b27",
       "sourceName": "contracts/libraries/logic/LiquidationLogic.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -1822,48 +1784,6 @@
         "TransparentUpgradeableProxy"
       ]
     },
-    "/Users/guotie/guotie/opensource/evolving-core/contracts/Market.sol": {
-      "lastModificationDate": 1647770890995,
-      "contentHash": "c54375549747a52e74f30c3c4d77d1e2",
-      "sourceName": "contracts/Market.sol",
-      "solcConfig": {
-        "version": "0.8.9",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "none"
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
-        "./interfaces/IMarket.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Market"
-      ]
-    },
     "/Users/guotie/guotie/opensource/evolving-core/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
       "lastModificationDate": 1647058163858,
       "contentHash": "8398972af73b4e9e5ff3b31cad86234f",
@@ -1979,8 +1899,8 @@
       "artifacts": []
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/Bank.sol": {
-      "lastModificationDate": 1651462505273,
-      "contentHash": "5fb6013a9ccb2693df75d531e2500b14",
+      "lastModificationDate": 1651465724297,
+      "contentHash": "10d290ee293ebbe4f95f5a2dc698733f",
       "sourceName": "contracts/Bank.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -2027,6 +1947,7 @@
         "./libraries/logic/GenericLogic.sol",
         "./libraries/logic/ValidationLogic.sol",
         "./libraries/logic/BorrowLogic.sol",
+        "./libraries/logic/RepayLogic.sol",
         "./libraries/logic/LiquidationLogic.sol",
         "./libraries/configuration/ReserveConfiguration.sol",
         "./libraries/configuration/UserConfiguration.sol",
@@ -2082,8 +2003,8 @@
       ]
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/BankStorage.sol": {
-      "lastModificationDate": 1651323419288,
-      "contentHash": "2b2f5e4f0b70e3484b661e6002fc028f",
+      "lastModificationDate": 1651465700781,
+      "contentHash": "dc3fa7e6fa32a7921352b1590681699b",
       "sourceName": "contracts/BankStorage.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -2115,7 +2036,6 @@
         "./libraries/configuration/UserConfiguration.sol",
         "./libraries/configuration/ReserveConfiguration.sol",
         "./libraries/logic/ReserveLogic.sol",
-        "./interfaces/IMarket.sol",
         "./libraries/types/DataTypes.sol"
       ],
       "versionPragmas": [
@@ -2211,8 +2131,8 @@
       ]
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/interfaces/IBankHelper.sol": {
-      "lastModificationDate": 1651463606474,
-      "contentHash": "abd7002553495e08f470c5f3d6430da3",
+      "lastModificationDate": 1651463886886,
+      "contentHash": "8e38b937e27d736f40ac5151472a5e1d",
       "sourceName": "contracts/interfaces/IBankHelper.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -2253,8 +2173,8 @@
       ]
     },
     "/Users/guotie/guotie/opensource/evolving-core/contracts/BankHelper.sol": {
-      "lastModificationDate": 1651463017203,
-      "contentHash": "4d90e10c2f4d932fb16ba6fdcbf55782",
+      "lastModificationDate": 1651463979592,
+      "contentHash": "84c153c20424f577ffb5a6d969c59569",
       "sourceName": "contracts/BankHelper.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -2298,6 +2218,58 @@
       ],
       "artifacts": [
         "BankHelper"
+      ]
+    },
+    "/Users/guotie/guotie/opensource/evolving-core/contracts/libraries/logic/RepayLogic.sol": {
+      "lastModificationDate": 1651465568556,
+      "contentHash": "89014930900a68ec28a1521f566c488d",
+      "sourceName": "contracts/libraries/logic/RepayLogic.sol",
+      "solcConfig": {
+        "version": "0.8.9",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/interfaces/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/math/SafeMath.sol",
+        "./ValidationLogic.sol",
+        "../types/DataTypes.sol",
+        "../math/WadRayMath.sol",
+        "../math/PercentageMath.sol",
+        "../configuration/ReserveConfiguration.sol",
+        "../configuration/UserConfiguration.sol",
+        "../../interfaces/IBank.sol",
+        "../../interfaces/IPriceOracleGetter.sol",
+        "../../interfaces/IEToken.sol",
+        "../../interfaces/IVariableDebtToken.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "RepayLogic"
       ]
     }
   }

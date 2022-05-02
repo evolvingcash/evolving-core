@@ -81,5 +81,5 @@ interface IBankHelper {
 
   function batchInitReserve(IBankKeeper pool, InitReserveInput[] calldata input) external;
   function updateEToken(IBank pool, UpdateETokenInput calldata input) external;
-
+  function updateVariableDebtToken(IBank pool, UpdateDebtTokenInput calldata input) external;
 }
